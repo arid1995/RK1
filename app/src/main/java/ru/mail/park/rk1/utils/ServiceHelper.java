@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.mail.park.rk1.utils.news.RetrieveNewsIntentService;
+import ru.mail.weather.lib.Scheduler;
 
 /**
  * Created by farid on 3/7/17.
@@ -40,8 +41,8 @@ public class ServiceHelper {
         LocalBroadcastManager.getInstance(context).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                int id = intent.getIntExtra(RetrieveNewsIntentService.EXTRA_TASK_ID, -1);
                 if (intent.getAction().equals(RetrieveNewsIntentService.ACTION_NEWS_RETRIEVED)) {
-                    int id = intent.getIntExtra(RetrieveNewsIntentService.EXTRA_TASK_ID, -1);
                     if (id != -1) {
                         listeners.get(id).handleResult(
                                 intent.getStringExtra(RetrieveNewsIntentService.EXTRA_NEWS_HEADER),
@@ -49,12 +50,12 @@ public class ServiceHelper {
                                 new SimpleDateFormat("MM/dd/yyyy").format(new Date(
                                         intent.getLongExtra(RetrieveNewsIntentService.EXTRA_NEWS_DATE, -1)))
                         );
-                        listeners.remove(id);
                     }
                     return;
                 }
 
-                Toast.makeText(context, "Something has gone waaaaaaay south!!!", Toast.LENGTH_SHORT).show();
+                listeners.get(id).handleError();
+                listeners.remove(id);
             }
         }, filter);
     }
@@ -75,7 +76,24 @@ public class ServiceHelper {
         listeners.remove(id);
     }
 
+    public void refreshInBackground(Context context) {
+        Intent intent = new Intent(context, RetrieveNewsIntentService.class);
+        intent.setAction(RetrieveNewsIntentService.ACTION_NEWS_REFRESH);
+
+        Scheduler.getInstance().schedule(context, intent, 70000);
+        Toast.makeText(context, "On", Toast.LENGTH_SHORT).show();
+    }
+
+    public void stopRefreshing(Context context) {
+        Intent intent = new Intent(context, RetrieveNewsIntentService.class);
+        intent.setAction(RetrieveNewsIntentService.ACTION_NEWS_REFRESH);
+
+        Scheduler.getInstance().unschedule(context, intent);
+        Toast.makeText(context, "Off", Toast.LENGTH_SHORT).show();
+    }
+
     public interface ResponseListener {
         void handleResult(String topic, String body, String date);
+        void handleError();
     }
 }

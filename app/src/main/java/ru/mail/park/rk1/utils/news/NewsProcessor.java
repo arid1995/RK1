@@ -38,6 +38,11 @@ public class NewsProcessor {
             }
         }
 
+        return getFromNet(storage, category);
+    }
+
+    private News getFromNet(Storage storage, String category) {
+        News news;
         NewsLoader newsLoader = new NewsLoader();
 
         try {

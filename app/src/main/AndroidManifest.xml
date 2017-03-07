@@ -20,8 +20,7 @@
 
         <activity android:name=".activities.SettingsActivity">
         </activity>
-        <service android:name=".utils.news.RetrieveNewsIntentService"
-            android:exported="false">
+        <service android:name=".utils.news.RetrieveNewsIntentService">
         </service>
     </application>
 

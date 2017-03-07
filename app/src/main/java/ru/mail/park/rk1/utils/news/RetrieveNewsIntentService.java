@@ -22,7 +22,10 @@ public class RetrieveNewsIntentService extends IntentService {
     public static final String EXTRA_NEWS_BODY = "extra.NEWS_BODY";
     public static final String EXTRA_NEWS_DATE = "extra.NEWS_DATE";
 
+    public static final String ACTION_NEWS_REFRESH = "action.NEWS_REFRESH";
+
     public static final String ACTION_NEWS_ERRORED = "action.NEWS_ERRORED";
+
 
     private int taskId;
 
@@ -32,16 +35,21 @@ public class RetrieveNewsIntentService extends IntentService {
 
     @Override
     public void onHandleIntent(Intent intent) {
-        if (!intent.getAction().equals(ACTION_REQUEST_NEWS))
-            return;
-        boolean refresh = intent.getBooleanExtra(EXTRA_NEWS_REFRESH, true);
+        if (intent.getAction().equals(ACTION_REQUEST_NEWS)) {
+            boolean refresh = intent.getBooleanExtra(EXTRA_NEWS_REFRESH, true);
 
-        taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+            taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
 
-        NewsProcessor processor = new NewsProcessor(this);
+            NewsProcessor processor = new NewsProcessor(this);
 
-        News news = processor.processRequest(refresh);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(createIntent(news));
+            News news = processor.processRequest(refresh);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(createIntent(news));
+        }
+
+        if (intent.getAction().equals(ACTION_NEWS_REFRESH)) {
+            NewsProcessor processor = new NewsProcessor(this);
+            processor.processRequest(true);
+        }
     }
 
     private Intent createIntent(News news) {

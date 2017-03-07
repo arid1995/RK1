@@ -10,10 +10,12 @@ import android.widget.Toast;
 
 import ru.mail.park.rk1.R;
 import ru.mail.park.rk1.utils.ServiceHelper;
+import ru.mail.weather.lib.Scheduler;
 import ru.mail.weather.lib.Topics;
 
 public class MainActivity extends AppCompatActivity implements ServiceHelper.ResponseListener {
     private int taskId = 0;
+    private boolean backgroundRefresh = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,24 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Res
             }
         });
 
+        findViewById(R.id.background_refresh_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (backgroundRefresh) {
+                    ServiceHelper.getInstance(MainActivity.this).refreshInBackground(MainActivity.this);
+                    backgroundRefresh = false;
+                } else {
+                    ServiceHelper.getInstance(MainActivity.this).stopRefreshing(MainActivity.this);
+                    backgroundRefresh = true;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
         taskId = ServiceHelper.getInstance(MainActivity.this)
                 .requestInfo(MainActivity.this, MainActivity.this, false);
     }
@@ -50,6 +70,12 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Res
         ((TextView) findViewById(R.id.news_header)).setText(header);
         ((TextView) findViewById(R.id.news_body)).setText(body);
         ((TextView) findViewById(R.id.news_date)).setText(date);
+        taskId = 0;
+    }
+
+    @Override
+    public void handleError() {
+        Toast.makeText(this, "Something has gone waaaaaaay south", Toast.LENGTH_SHORT).show();
         taskId = 0;
     }
 
