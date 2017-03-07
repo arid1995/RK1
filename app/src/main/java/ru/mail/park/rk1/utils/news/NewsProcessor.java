@@ -24,7 +24,7 @@ public class NewsProcessor {
         Storage storage = Storage.getInstance(context);
         News news;
 
-        if (storage.loadCurrentTopic() == null) {
+        if (storage.loadCurrentTopic() == null || storage.loadCurrentTopic().equals("")) {
             storage.saveCurrentTopic(Topics.IT);
         }
 
